@@ -1,112 +1,312 @@
-/**
- * MAIN CLASS - PalindromeCheckerApp
- *
- * Use Case 12: Strategy Pattern for Palindrome Algorithms
- *
- * Description:
- * This class demonstrates how different palindrome
- * validation algorithms can be selected dynamically
- * at runtime using the Strategy Design Pattern.
- *
- * At this stage, the application:
- * - Defines a common PalindromeStrategy interface
- * - Implements a concrete Stack-based strategy
- * - Injects the strategy at runtime
- * - Executes the selected algorithm
- *
- * No performance comparison is done in this use case.
- * The focus is purely on algorithm interchangeability.
- *
- * The goal is to teach extensible algorithm design.
- *
- * @author Om
- * @version 12.0
- */
+import java.util.*;
 
-import java.util.Scanner;
+/**
+ * PalindromeAlgorithmsApp
+ *
+ * A standalone program demonstrating multiple
+ * palindrome checking techniques.
+ *
+ * Use Cases Covered:
+ * UC2  - Hardcoded result
+ * UC3  - Reverse String method
+ * UC4  - Character Array
+ * UC5  - Stack
+ * UC6  - Queue + Stack
+ * UC7  - Deque
+ * UC8  - LinkedList
+ * UC9  - Recursion
+ * UC10 - Normalized string comparison
+ * UC11 - Object-Oriented Service
+ * UC12 - Strategy Pattern
+ */
 
 public class PallindromeCheckerApp {
 
-    /**
-     * Application entry point for UC12.
-     *
-     * @param args Command-line arguments
-     */
     public static void main(String[] args) {
 
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter String -> ");
-        String input = sc.nextLine();
+        Scanner scanner = new Scanner(System.in);
 
-        // Inject strategy at runtime
+        System.out.println("===== Palindrome Algorithm Demonstration =====");
+        System.out.print("Enter a string: ");
+        String input = scanner.nextLine();
+
+        System.out.println();
+
+        run("UC2 - Hardcoded Result", input, PallindromeCheckerApp::hardcodedCheck);
+        run("UC3 - Reverse String", input, PallindromeCheckerApp::reverseMethod);
+        run("UC4 - Character Array", input, PallindromeCheckerApp::charArrayMethod);
+        run("UC5 - Stack", input, PallindromeCheckerApp::stackMethod);
+        run("UC6 - Queue + Stack", input, PallindromeCheckerApp::queueStackMethod);
+        run("UC7 - Deque", input, PallindromeCheckerApp::dequeMethod);
+        run("UC8 - LinkedList", input, PallindromeCheckerApp::linkedListMethod);
+        run("UC9 - Recursion", input, PallindromeCheckerApp::recursiveMethod);
+        run("UC10 - Normalized", input, PallindromeCheckerApp::normalizedMethod);
+
+        // UC11 - OOP Service
+        PalindromeService service = new PalindromeService();
+        run("UC11 - OOP Service", input, service::checkPalindrome);
+
+        // UC12 - Strategy Pattern
         PalindromeStrategy strategy = new StackStrategy();
+        run("UC12 - Strategy Pattern (Stack)", input, strategy::check);
 
-        boolean result = strategy.check(input);
-
-        System.out.println("Input : " + input);
-        System.out.println("Is Palindrome? : " + result);
-
-        sc.close();
+        scanner.close();
     }
-}
 
-/**
- * INTERFACE - PalindromeStrategy
- *
- * This interface defines a contract for all
- * palindrome checking algorithms.
- *
- * Any new algorithm must implement this interface
- * and provide its own validation logic.
- */
-interface PalindromeStrategy {
+    // =====================================================
+    // Benchmark Runner
+    // =====================================================
 
-    /**
-     * Checks whether input string is a palindrome.
-     *
-     * @param input String to validate
-     * @return true if palindrome, false otherwise
-     */
-    boolean check(String input);
-}
+    private static void run(String name, String input, PalindromeAlgorithm algorithm) {
 
-/**
- * CLASS - StackStrategy
- *
- * This class provides a Stack-based implementation
- * of the PalindromeStrategy interface.
- *
- * It uses LIFO behavior to reverse characters
- * and compare them with the original sequence.
- */
-class StackStrategy implements PalindromeStrategy {
+        long start = System.nanoTime();
 
-    /**
-     * Implements palindrome validation using Stack.
-     *
-     * @param input String to validate
-     * @return true if palindrome, false otherwise
-     */
-    public boolean check(String input) {
+        boolean result = algorithm.check(input);
 
-        // Normalize input (optional but consistent with UC10/UC11)
-        String normalized = input.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+        long end = System.nanoTime();
 
-        // Create a stack to store characters
-        java.util.Stack<Character> stack = new java.util.Stack<>();
+        System.out.println(name);
+        System.out.println("Result : " + result);
+        System.out.println("Time   : " + (end - start) + " ns");
+        System.out.println("-------------------------------------");
+    }
 
-        // Push each character onto the stack
-        for (char c : normalized.toCharArray()) {
+    interface PalindromeAlgorithm {
+        boolean check(String input);
+    }
+
+    // =====================================================
+    // UC2 - Hardcoded Result
+    // =====================================================
+
+    private static boolean hardcodedCheck(String input) {
+        return input.equals("madam");
+    }
+
+    // =====================================================
+    // UC3 - Reverse String
+    // =====================================================
+
+    private static boolean reverseMethod(String input) {
+
+        String reversed = new StringBuilder(input).reverse().toString();
+
+        return input.equals(reversed);
+    }
+
+    // =====================================================
+    // UC4 - Character Array
+    // =====================================================
+
+    private static boolean charArrayMethod(String input) {
+
+        char[] array = input.toCharArray();
+
+        int start = 0;
+        int end = array.length - 1;
+
+        while (start < end) {
+
+            if (array[start] != array[end]) {
+                return false;
+            }
+
+            start++;
+            end--;
+        }
+
+        return true;
+    }
+
+    // =====================================================
+    // UC5 - Stack
+    // =====================================================
+
+    private static boolean stackMethod(String input) {
+
+        Stack<Character> stack = new Stack<>();
+
+        for (char c : input.toCharArray()) {
             stack.push(c);
         }
 
-        // Compare characters by popping from stack
-        for (char c : normalized.toCharArray()) {
+        for (char c : input.toCharArray()) {
+
             if (c != stack.pop()) {
+                return false;
+            }
+
+        }
+
+        return true;
+    }
+
+    // =====================================================
+    // UC6 - Queue + Stack
+    // =====================================================
+
+    private static boolean queueStackMethod(String input) {
+
+        Queue<Character> queue = new LinkedList<>();
+        Stack<Character> stack = new Stack<>();
+
+        for (char c : input.toCharArray()) {
+
+            queue.add(c);
+            stack.push(c);
+        }
+
+        while (!queue.isEmpty()) {
+
+            if (!queue.remove().equals(stack.pop())) {
+                return false;
+            }
+
+        }
+
+        return true;
+    }
+
+    // =====================================================
+    // UC7 - Deque
+    // =====================================================
+
+    private static boolean dequeMethod(String input) {
+
+        Deque<Character> deque = new ArrayDeque<>();
+
+        for (char c : input.toCharArray()) {
+
+            deque.addLast(c);
+        }
+
+        while (deque.size() > 1) {
+
+            char first = deque.removeFirst();
+            char last = deque.removeLast();
+
+            if (first != last) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    // =====================================================
+    // UC8 - LinkedList
+    // =====================================================
+
+    private static boolean linkedListMethod(String input) {
+
+        LinkedList<Character> list = new LinkedList<>();
+
+        for (char c : input.toCharArray()) {
+
+            list.add(c);
+        }
+
+        while (list.size() > 1) {
+
+            char first = list.removeFirst();
+            char last = list.removeLast();
+
+            if (first != last) {
+                return false;
+            }
+
+        }
+
+        return true;
+    }
+
+    // =====================================================
+    // UC9 - Recursion
+    // =====================================================
+
+    private static boolean recursiveMethod(String input) {
+
+        return recursiveCheck(input, 0, input.length() - 1);
+    }
+
+    private static boolean recursiveCheck(String s, int start, int end) {
+
+        if (start >= end) {
+            return true;
+        }
+
+        if (s.charAt(start) != s.charAt(end)) {
+            return false;
+        }
+
+        return recursiveCheck(s, start + 1, end - 1);
+    }
+
+    // =====================================================
+    // UC10 - Normalized (Ignore spaces/punctuation)
+    // =====================================================
+
+    private static boolean normalizedMethod(String input) {
+
+        String normalized = input
+                .replaceAll("[^a-zA-Z0-9]", "")
+                .toLowerCase();
+
+        return reverseMethod(normalized);
+    }
+
+    // =====================================================
+    // UC11 - OOP Service
+    // =====================================================
+
+    static class PalindromeService {
+
+        public boolean checkPalindrome(String input) {
+
+            int start = 0;
+            int end = input.length() - 1;
+
+            while (start < end) {
+
+                if (input.charAt(start) != input.charAt(end)) {
+                    return false;
+                }
+
+                start++;
+                end--;
+            }
+
+            return true;
+        }
+    }
+
+    // =====================================================
+    // UC12 - Strategy Pattern
+    // =====================================================
+
+    interface PalindromeStrategy {
+        boolean check(String input);
+    }
+
+    static class StackStrategy implements PalindromeStrategy {
+
+        public boolean check(String input) {
+
+            Stack<Character> stack = new Stack<>();
+
+            for (char c : input.toCharArray()) {
+                stack.push(c);
+            }
+
+            for (char c : input.toCharArray()) {
+
+                if (c != stack.pop()) {
+                    return false;
+                }
+
+            }
+
+            return true;
+        }
     }
 }
